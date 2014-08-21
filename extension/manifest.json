@@ -12,15 +12,22 @@
     "128": "assets/icon128.png"
   },
   "page_action": {
-    "default_icon": "assets/icon19.png",
+    "default_icon": {
+      "19": "assets/icon19.png",
+      "38": "assets/icon38.png"
+    },
     "default_title": "Firebase Trend Tracker",
-    "default_popup": "web/browser_action.html"
+    "default_popup": "web/page_action.html"
   },
   "background": {
     "scripts": ["js/background.js"],
     "persistent": false
   },
   "permissions": [
-    "declarativeContent"
+    "declarativeContent",
+    "*://firebase.desk.com/*",
+    "*://groups.google.com/forum*",
+    "*://stackoverflow.com/questions*",
+    "activeTab"
   ]
 }
