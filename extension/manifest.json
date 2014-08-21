@@ -1,0 +1,26 @@
+{
+  "name": "Firebase Trend Tracker",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Firebase Trend Tracker Extension.",
+  "homepage_url": "https://www.firebase.com",
+
+  "content_security_policy": "script-src 'self' https://cdn.firebase.com https://*.firebaseio.com https://*.firebaseio-demo.com; object-src 'self'",
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "page_action": {
+    "default_icon": "assets/icon19.png",
+    "default_title": "Firebase Trend Tracker",
+    "default_popup": "web/browser_action.html"
+  },
+  "background": {
+    "scripts": ["js/background.js"],
+    "persistent": false
+  },
+  "permissions": [
+    "declarativeContent"
+  ]
+}
