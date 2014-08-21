@@ -1,0 +1,76 @@
+{
+  "trends": {
+    "trend1": {
+      "shortName": "broken-code",
+      "summary": "code is broken",
+      "count": 3
+    },
+    "trend2": {
+      "shortName": "wants-keyboard",
+      "summary": "wants a new keyboard",
+      "count": 1
+    },
+    "trend3": {
+      "shortName": "needs-sql-queries",
+      "summary": "needs SQL queries to sleep at night",
+      "count": 0
+    }
+  },
+  "entries": {
+    "trend1": {
+      "entry1": {
+        "timestamp": 1408346599307,
+        "userid": "kato",
+        "source": "https://firebase.desk.com/agent/case/5884"
+      },
+      "entry2": {
+        "timestamp": 1408174144569,
+        "userid": "david",
+        "source": "https://github.com/firebase/angularfire/issues/386"
+      },
+      "entry3": {
+        "timestamp": 1408174134569,
+        "userid": "ossama",
+        "source": "http://stackoverflow.com/questions/25416654/upgrading-angularfire-causes-scripts-to-stop-working"
+      }
+    },
+    "trend2": {
+      "entry4": {
+        "timestamp": 1408174134569,
+        "userid": "david",
+        "source": "https://twitter.com/AmazedByAnimals/statuses/502330614235013121",
+        "notes": "This is a very special entry"
+      }
+    }
+  },
+  "ownership": {
+    "hash1201137905": "kato"
+  },
+  "tags": {
+    "sql": {
+      "trend3": true
+    },
+    "silly": {
+      "trend1": true,
+      "trend2": true
+    }
+  },
+  "users": {
+    "kato": {
+      "name": "Kato and Hobbes",
+      "email": "wulf@firebase.com",
+      "avatar": "http://www.gravatar.com/avatar/9b0148c61b6a92b7f6f84cbd0b23552f.png"
+    },
+    "david": {
+      "name": "David Carradine",
+      "email": "david@firebase.com",
+      "avatar": "http://www.gravatar.com/avatar/002be48ec1d59151d9d759132fed57f4.jpg"
+    },
+    "ossama": {
+      "name": "Ossama Alami",
+      "email": "ossama@firebase.com",
+      "avatar": "http://www.gravatar.com/avatar/bf4d086105299341b1facd60ab0feef7.jpg"
+    }
+  }
+
+}
