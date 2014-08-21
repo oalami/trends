@@ -18,17 +18,18 @@
 <body>
 
 <div id="mainPopup">
-  <h1>Firebase test!</h1>
+  <h1>Add a trend item</h1>
 
-  <p>Clicks: <span id="contents"></span></p>
+  <form>
+    <textarea id="input_summary"></textarea><br/>
+    <label for="input_url">URL</label><input type="text" id="input_url"/><br/>
+    <label for="input_url">Tags</label><input type="text" id="input_tags"/>
+  </form>
+
 </div>
 
 <script src="https://cdn.firebase.com/js/client/1.0.19/firebase.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<script src="../js/page_action.js"></script>
-<script>
-
-  console.log()
-</script>
+<script src="../lib/jquery-2.1.1.min.js"></script>
+<script src="../js/browser_action.js"></script>
 </body>
 </html>
