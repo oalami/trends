@@ -15,4 +15,4 @@ testing
     npm install
     instance='<your firebase name>' npm test
 
-intellij/webstorm config: https://www.dropbox.com/s/oxfj3ilw23vj52f/Screenshot%202014-08-21%2009.50.00.png
+[click here for intellij/webstorm config](https://www.dropbox.com/s/mx8l0pqf07dqgkb/Screenshot%202014-08-21%2020.45.44.png)
