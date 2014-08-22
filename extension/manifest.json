@@ -19,15 +19,19 @@
     "default_title": "Firebase Trend Tracker",
     "default_popup": "web/browser_action.html"
   },
-  "background": {
-    "scripts": ["js/background.js"],
-    "persistent": false
-  },
+  "content_scripts": [
+    {
+      "matches": ["https://trends.firebaseapp.com/login.html"],
+      "js": ["js/auth.js", "lib/jquery-2.1.1.min.js"]
+    }
+  ],
   "permissions": [
     "declarativeContent",
     "*://firebase.desk.com/*",
     "*://groups.google.com/forum*",
     "*://stackoverflow.com/questions*",
-    "tabs"
+    "https://trends.firebaseapp.com/login.html",
+    "tabs",
+    "storage"
   ]
 }

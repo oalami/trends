@@ -1,0 +1,34 @@
+<html>
+
+<head>
+  <script src="https://cdn.firebase.com/js/client/1.0.19/firebase.js"></script>
+  <script src="https://cdn.firebase.com/js/simple-login/1.6.3/firebase-simple-login.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script>
+    var ref = new Firebase("https://trends.firebaseio.com");
+
+    authClient = new FirebaseSimpleLogin(ref, function(error, user) {
+      if(error) {
+        // an error occurred while attempting login
+        console.log(error);
+      } else if(user) {
+        $('#firebaseAuthToken').text(user.firebaseAuthToken);
+        console.log("User ID: " + user.uid + ", Provider: " + user.provider);
+      } else {
+        authClient.login('google', {preferRedirect: true});
+        // user is logged out
+      }
+    });
+
+
+
+
+  </script>
+</head>
+<body>
+  <h1>Logging In...</h1>
+  <div id="firebaseAuthToken" style="display: none;"></div>
+
+</body>
+
+</html>
