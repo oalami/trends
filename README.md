@@ -9,3 +9,10 @@ Design Specs
  * [API stubs and data structure](https://gist.github.com/katowulf/ffe6c0dc54cc778608bc)
  * [Firebase instance](https://trends.firebaseio.com/)
 
+testing
+-------
+
+    npm install
+    instance='<your firebase name>' npm test
+
+intellij/webstorm config: https://www.dropbox.com/s/oxfj3ilw23vj52f/Screenshot%202014-08-21%2009.50.00.png

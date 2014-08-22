@@ -1,23 +1,20 @@
 {
   "trends": {
-    "trend1": {
-      "shortName": "broken-code",
+    "broken-code": {
       "summary": "code is broken",
       "count": 3
     },
-    "trend2": {
-      "shortName": "wants-keyboard",
+    "wants-keyboard": {
       "summary": "wants a new keyboard",
       "count": 1
     },
-    "trend3": {
-      "shortName": "needs-sql-queries",
+    "needs-sql-queries": {
       "summary": "needs SQL queries to sleep at night",
       "count": 0
     }
   },
   "entries": {
-    "trend1": {
+    "broken-code": {
       "entry1": {
         "timestamp": 1408346599307,
         "userid": "kato",
@@ -34,7 +31,7 @@
         "source": "http://stackoverflow.com/questions/25416654/upgrading-angularfire-causes-scripts-to-stop-working"
       }
     },
-    "trend2": {
+    "wants-keyboard": {
       "entry4": {
         "timestamp": 1408174134569,
         "userid": "david",
@@ -48,11 +45,11 @@
   },
   "tags": {
     "sql": {
-      "trend3": true
+      "needs-sql-queries": true
     },
     "silly": {
-      "trend1": true,
-      "trend2": true
+      "broken-code": true,
+      "wants-keyboard": true
     }
   },
   "users": {
