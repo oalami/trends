@@ -106,7 +106,7 @@
         userid: userId,
         timestamp: Firebase.ServerValue.TIMESTAMP
       };
-      ref.set(data, function(err) {
+      ref.setWithPriority(data, Firebase.ServerValue.TIMESTAMP, function(err) {
         if( err ) { def.reject(err); }
         else {
           api.createRef('trends/'+shortName+'/count').transaction(
@@ -144,17 +144,15 @@
     };
 
     /**
-     * Search for similar trends in Firebase. This will utilize Flashlight and perform an ElasticSearch of existing
-     * trends. The results returned will be POJOs containing at least the following:
-     *   {string} id
-     *   {string} summary
-     *   {string} tags
-     *   {string} url
+     * Search for similar trends in Firebase. This will utilize Flashlight and perform an
+     * ElasticSearch of existing trends.
      *
      * @param {string} term
-     * @returns promise that resolves to an array of results
+     * @returns {TrendsSearch} with a run() and cancel() method
      */
-    api.searchForTrends = function (term) {};
+    api.createTrendsSearch = function (term) {
+      return new TrendsSearch(term);
+    };
 
     /**
      * Create account for a Google authenticated user. This should be called any time a user authenticates with simple login.
@@ -207,6 +205,7 @@
 
     /**
      * @param {string} url
+     * @param {function} callback
      * @returns promise that resolves to a user id or null (if not owned)
      */
     api.onOwnerChange = function (url, callback) {
@@ -285,6 +284,94 @@
         if( err ) { def.reject(err); }
         else { def.resolve(result); }
       }
+    };
+
+    /**
+     * Perform a search of the trends/ table using ElasticSearch. Also includes a list of entries
+     * for each matching trend.
+     *
+     * @constructor
+     */
+    function TrendsSearch(term) {
+      if( !term.match(/^\*/) ) { term = '*'+term; }
+      if( !term.match(/\*$/) ) { term += '*'; }
+      this.query = {
+        'query_string': { query: term }
+      };
+      this._canceled = false;
     }
+    TrendsSearch.prototype = {
+      /**
+       * Runs the search and returns an array of POJOs with the following structure:
+       *    {string} id      - the firebase path key (the short name for the trend)
+       *    {int}    count   - the number of "entries" for this trend
+       *    {string} summary - the descriptive summary of the trend
+       *    {object} entries - list of entries for the trend, with keys source, timestamp, and userid
+       *
+       * @returns promise which resolves to an array
+       */
+      run: function() {
+        return this._doSearch(this.query)
+          .then(this._getEntries.bind(this))
+          .then(this._sendResults.bind(this));
+      },
+      cancel: function() {
+        this._canceled = true;
+      },
+      _sendResults: function(hits) {
+        var self = this;
+        return $.Deferred(function(def) {
+          if( self._canceled ) {
+            def.reject('canceled');
+          }
+          else {
+            def.resolve(hits);
+          }
+        }).promise();
+      },
+      _doSearch: function(query) {
+        var def = $.Deferred();
+        var ref = new Firebase(URL+'/search');
+        var key = ref.child('request').push({ index: index, type: type, query: query }).name();
+  //      console.log('search', key, { index: index, type: type, query: query });
+        ref.child('response/'+key).on('value', function fn(snap) {
+          if( snap.val() === null ) { return; }
+          snap.ref().off('value', fn);
+          snap.ref().remove();
+          def.resolve(this._parseResults(snap.val()));
+        }, def.reject, this);
+        return def.promise();
+      },
+      _parseResults: function(results) {
+        if( results.hits ) {
+          $.each(results.hits, function(k,v) {
+            results.hits[k] = $.extend({id: v._id, score: v._score}, v._source);
+          });
+        }
+        return results.hits || [];
+      },
+      _getEntries: function(hits) {
+        var def;
+        var fb = new Firebase(URL+'/entries');
+        if( hits && !this._canceled ) {
+          var promises = [];
+          $.each(hits, function(k, hit) {
+            promises.push($.Deferred(function(def) {
+              fb.child(hit.id).once('value', function(snap) {
+                hit.entries = snap.val() || {};
+                def.resolve();
+              }, def.reject);
+            }).promise());
+          });
+          def = $.when.apply($, promises).then(function() {
+            return hits;
+          })
+        }
+        else {
+          def = $.Deferred(function(def) { def.resolve(hits); });
+        }
+        return def.promise();
+      }
+    };
   }
 );

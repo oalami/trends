@@ -88,9 +88,22 @@ exports.testAddEntry_incrementsCounter = function(test) {
         counterRef.once('value', function(snap) {
           test.equal(snap.val(), orig + 1, 'counter incremented by 1');
           test.done();
-        });
+        })
+        .done();
       }, test.ok.bind(test, false));
   });
+};
+
+exports.testAddEntry_hasPriority = function(test) {
+  test.expect(1);
+  api.addEntry('broken-code', 'kato', 'http://kato.com/2')
+    .then(function(ref) {
+      ref.once('value', function(snap) {
+        test.ok(snap.getPriority() > 0, 'has a priority');
+        test.done();
+      });
+    })
+    .done();
 };
 
 //todo exports.testAddEntry_nodups = function(test) {};
