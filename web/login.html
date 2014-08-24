@@ -7,26 +7,46 @@
   <script>
     var ref = new Firebase("https://trends.firebaseio.com");
 
+    function createAccount(user) {
+      if (!user.email || !user.email.match(/@firebase.com$/) ) {
+        throw new Error('Invalid email; not a Firebase.com account');
+      }
+      else {
+        var uref = ref.child('users/' + user.uid);
+        uref.set({
+          name: user.displayName,
+          email: user.email,
+          avatar: user.thirdPartyUserData.picture
+        }, function(err) {
+          if( err ) { console.error(err); }
+          else {
+            console.log('user created', user.uid);
+          }
+        });
+      }
+    }
+
     authClient = new FirebaseSimpleLogin(ref, function(error, user) {
       if(error) {
         // an error occurred while attempting login
         console.log(error);
       } else if(user) {
+        $('#firebaseUid').text(user.uid);
         $('#firebaseAuthToken').text(user.firebaseAuthToken);
+
         console.log("User ID: " + user.uid + ", Provider: " + user.provider);
+        createAccount(user);
       } else {
         authClient.login('google', {preferRedirect: true});
         // user is logged out
       }
     });
 
-
-
-
   </script>
 </head>
 <body>
   <h1>Logging In...</h1>
+  <div id="firebaseUid" style="display:none;"></div>
   <div id="firebaseAuthToken" style="display: none;"></div>
 
 </body>

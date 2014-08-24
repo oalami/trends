@@ -5,7 +5,7 @@
   "description": "Firebase Trend Tracker Extension.",
   "homepage_url": "https://www.firebase.com",
 
-  "content_security_policy": "script-src 'self' https://ajax.googleapis.com https://cdn.firebase.com https://*.firebaseio.com https://*.firebaseio-demo.com; object-src 'self'",
+  "content_security_policy": "script-src 'self' https://ajax.googleapis.com https://code.jquery.com https://cdnjs.cloudflare.com https://cdn.firebase.com https://*.firebaseio.com https://*.firebaseio-demo.com; object-src 'self'",
   "icons": {
     "16": "assets/icon16.png",
     "48": "assets/icon48.png",
@@ -21,6 +21,10 @@
   },
   "content_scripts": [
     {
+      "matches": ["http://localhost:3000/login.html"],
+      "js": ["js/auth.js", "lib/jquery-2.1.1.min.js"]
+    },
+    {
       "matches": ["https://trends.firebaseapp.com/login.html"],
       "js": ["js/auth.js", "lib/jquery-2.1.1.min.js"]
     }
@@ -30,6 +34,8 @@
     "*://firebase.desk.com/*",
     "*://groups.google.com/forum*",
     "*://stackoverflow.com/questions*",
+    "*://twitter.com/*",
+    "*://localhost:3000/*",
     "https://trends.firebaseapp.com/login.html",
     "tabs",
     "storage"

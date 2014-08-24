@@ -2,37 +2,52 @@
 <html>
 <head>
 
-  <style type="text/css">
-    #mainPopup {
-      padding: 10px;
-      height: 200px;
-      width: 400px;
-      font-family: Helvetica, Ubuntu, Arial, sans-serif;
-    }
-
-    h1 {
-      font-size: 2em;
-    }
-  </style>
+  <link rel="stylesheet" href="../assets/styles.css"/>
 </head>
 <body>
 
 <div id="mainPopup">
-  <h1>Add a trend item</h1>
+  <div data-view="home">
+    <button data-target="ownThis" disabled="disabled">Own This</button>
+    <button data-target="addTrend" disabled="disabled">Add Trend</button>
+  </div>
+  <div data-view="ownThis" class="hide">
+    <p>Claiming...</p>
+  </div>
+  <div data-view="addTrend" class="hide">
+    <h1>Add a trend item</h1>
 
-  <form>
-    <textarea id="input_summary"></textarea><br/>
-    <label for="input_url">URL</label><input type="text" id="input_url"/><br/>
-    <label for="input_url">Tags</label><input type="text" id="input_tags"/>
-  </form>
-
-  <a id="login" href="#">login</a>
-
+    <form data-event="addTrend">
+      <textarea id="input_summary" style="width: 90%; min-height: 50px"></textarea><br/>
+      <label>
+        <span>Short Name</span>
+        <input type="text" id="input_shortname" placeholder="summary-of-trend" />
+      </label>
+      <label>
+        <span>URL</span>
+        <input type="text" id="input_url" placeholder="http://..." />
+      </label>
+      <label>
+        <span>tags</span>
+        <input type="text" id="input_tags" placeholder="type to search..." />
+      </label>
+      <button type="submit">Create New Trend</button>
+    </form>
+  </div>
+  <nav>
+    <button id="login">log in</button>
+    <button data-target="home" disabled="disabled" data-event="all-views" class="hide">cancel</button>
+    <a href="https://trends.firebaseapp.com" target="_blank">view trends</a>
+  </nav>
+  <ul id="messages"></ul>
 </div>
 
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/q.js/1.0.1/q.js"></script>
 <script src="https://cdn.firebase.com/js/client/1.0.19/firebase.js"></script>
 <script src="https://cdn.firebase.com/js/simple-login/1.6.3/firebase-simple-login.js"></script>
-<script src="../lib/jquery-2.1.1.min.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
 <script src="../js/browser_action.js"></script>
 </body>
 </html>

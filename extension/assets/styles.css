@@ -1,0 +1,56 @@
+
+body {
+    font-size: 16px;
+    line-height: 18px;
+    padding: 10px;
+}
+
+#mainPopup {
+    padding: 10px;
+    margin: 10px;
+    min-height: 250px;
+    width: 400px;
+    font-family: Helvetica, Ubuntu, Arial, sans-serif;
+}
+
+h1 {
+    font-size: 2em;
+}
+
+form label {
+    display: block;
+    margin: 10px 0;
+}
+
+form label span {
+    font-weight: bold;
+}
+
+form label input {
+    display: block;
+    width: 90%;
+    font-size: 16px;
+    line-height: 18px;
+}
+
+.hide {
+    display: none;
+}
+
+nav {
+    margin-top: 20px;
+}
+
+nav button {
+    margin-right: 15px;
+}
+
+#messages li.success {
+   background-color: #cdf2c8;
+   color: #008000;
+}
+
+#messages li.error {
+    color: #8a0000;
+    background-color: #ffffb2;
+}
