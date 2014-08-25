@@ -47,12 +47,17 @@ function onOpen($) {
       $('#input_url').val(url);
 
       if(url.match("stackoverflow.com/questions/[0-9]+/")) {
-        chrome.tabs.executeScript(null, { file: 'js/stackoverflow_parser.js' }, populateExtension);
-      }
-      //todo add other parsers for desk/google groups
-      else {
-        //todo add a generic parser that looks for an h1 or h2 tag and finds similar trends
-        //todo by using those?
+        chrome.tabs.executeScript(null, { file: 'js/parsers/stackoverflow.js' }, populateExtension);
+      } else if(url.match("https://firebase.desk.com/web/agent/case/[0-9]+")) {
+        chrome.tabs.executeScript(null, { file: 'js/parsers/new_desk.js' }, populateExtension);
+      } else if(url.match("https://firebase.desk.com/agent")) {
+        chrome.tabs.executeScript(null, { file: 'js/parsers/desk.js' }, populateExtension);
+      } else if(url.match("https://groups.google.com/forum/#!topic/.+/.+")) {
+        chrome.tabs.executeScript(null, { file: 'js/parsers/groups.js' }, populateExtension);
+      } else if(url.match("https://twitter.com/.+/status/[0-9]+")) {
+        chrome.tabs.executeScript(null, { file: 'js/parsers/twitter.js' }, populateExtension);
+      } else {
+        populateExtension([{summary: tab.title}]);
       }
 
       $('[data-target]').click(openView);
@@ -69,9 +74,14 @@ function onOpen($) {
 }
 
 function populateExtension(results) {
-  var summary = results[0].summary;
+  var result = results[0];
+  var summary = result.summary;
   $("#input_summary").val(summary);
-  $("#input_tags").val(results[0].tags.join(','));
+  if(result.tags) {
+    $("#input_tags").val(result.tags.join(','));
+  } else {
+    $("#input_tags").val()
+  }
   summaryChanged();
 }
 
