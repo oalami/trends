@@ -1,39 +1,44 @@
-var authClient = null;
 var ref = new Firebase("https://trends.firebaseio.com");
 var currentUserId = null;
 var documentUrl = null;
 
-chrome.storage.local.remove(["firebaseAuthToken", "firebaseUid"]);
-
 function onOpen($) {
-  var handleAuthTokenGet = function(items) {
-    var authToken = items.firebaseAuthToken;
-    if(authToken === null || authToken === '') {
-      $('#login').click(doLogin);
-      chrome.storage.onChanged.addListener(function(changes, areaName) {
-        chrome.storage.local.get({"firebaseAuthToken": null, "firebaseUid": null}, handleAuthTokenGet);
-      });
-    } else {
-      currentUserId = items.firebaseUid;
+  function handleAuthDataChanged(authToken, uid) {
+    if(authToken != null && authToken != '') {
+      currentUserId = uid;
       ref.auth(authToken, function(err) {
-        if( err ) { err(err); }
-        else { initPageEvents(); }
+        if( err ) {
+          chrome.storage.local.remove(["firebaseAuthToken", "firebaseUid"]);
+          err(err);
+        }
+        else {
+          initPageEvents();
+          $("#login").hide();
+        }
       });
     }
-  };
+  }
 
-  var getAuthToken = function() {
-    //todo-hack ossama: I broke the login page
-    handleAuthTokenGet({
-      firebaseAuthToken: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjU0NDc4ODMsInYiOjAsImQiOnsiaWQiOiIxMDE4MzQzNDc0Mjg0NDQ0ODAyOTQiLCJ1aWQiOiJnb29nbGU6MTAxODM0MzQ3NDI4NDQ0NDgwMjk0IiwicHJvdmlkZXIiOiJnb29nbGUiLCJlbWFpbCI6Ind1bGZAZmlyZWJhc2UuY29tIn0sImlhdCI6MTQwODgzOTg4M30.96mmlRwozvKfpgSvCFsHFlnso6DPg8Qv1gYQ4h6FaZU',
-      firebaseUid: 'google:101834347428444480294'
+  function initAuthEvents() {
+    $('#login').click(function() {
+      chrome.tabs.create({url: window.loginUrl});
     });
-//    chrome.storage.local.get({"firebaseAuthToken": null, "firebaseUid": null}, handleAuthTokenGet);
-  };
+
+    chrome.storage.local.get(['firebaseAuthToken', 'firebaseUid'], function(items) {
+      var authToken = items.firebaseAuthToken;
+      var uid = items.firebaseUid;
+      handleAuthDataChanged(authToken, uid);
+    });
+
+    chrome.storage.onChanged.addListener(function(changes, namespace) {
+      if(changes.firebaseAuthToken && changes.firebaseUid) {
+        handleAuthDataChanged(changes.firebaseAuthToken, changes.firebaseUid);
+      }
+    });
+  }
 
   function initPageEvents() {
     $('#input_summary').on('keyup change blur paste', summaryChanged);
-    $('#login').prop('disabled', true).text('logged in');
     $('#similar-trends').on('click', '[data-event="plusOne"]', addEntry);
     $('[data-target],[data-event]').prop('disabled', false);
     chrome.tabs.getSelected(null, function(tab) {
@@ -60,7 +65,7 @@ function onOpen($) {
     });
   }
 
-  getAuthToken();
+  initAuthEvents();
 }
 
 function populateExtension(results) {
@@ -145,10 +150,6 @@ function applyTrendsSearch(hits) {
       }
     });
   }
-}
-
-function doLogin() {
-  chrome.tabs.create({url: window.loginUrl});
 }
 
 function addEntry(e) {
