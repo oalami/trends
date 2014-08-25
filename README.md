@@ -16,3 +16,9 @@ testing
     instance='<your firebase name>' npm test
 
 [click here for intellij/webstorm config](https://www.dropbox.com/s/mx8l0pqf07dqgkb/Screenshot%202014-08-21%2020.45.44.png)
+
+todo
+----
+
+ * Improve search to include URLs, comments, and tags, for better ranking. Probably difficult.
+ * Ability to edit summary and tags of a trend

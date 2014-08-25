@@ -44,6 +44,11 @@ function onOpen($) {
       if(url.match("stackoverflow.com/questions/[0-9]+/")) {
         chrome.tabs.executeScript(null, { file: 'js/stackoverflow_parser.js' }, populateExtension);
       }
+      //todo add other parsers for desk/google groups
+      else {
+        //todo add a generic parser that looks for an h1 or h2 tag and finds similar trends
+        //todo by using those?
+      }
 
       $('[data-target]').click(openView);
       $('form[data-event="addTrend"]').submit(addTrend);
@@ -51,6 +56,7 @@ function onOpen($) {
       watchOwnership($button, url);
       $button.click(ownPage.bind(null, $button, url));
       watchUrlEntry(url);
+      updateTrendsSearch();
     });
   }
 
@@ -77,17 +83,20 @@ function populateShortName() {
 var currentSearch = null;
 var updateTrendsSearch = $.debounce(500, function() {
   var msg;
-  var $ul = $('#similar-trends').find('ul').first().empty();
+  var $ul = $('#similar-trends').find('ul').empty();
   if( currentSearch ) {
     currentSearch.cancel();
   }
   var term = $('#input_summary').val();
+  console.log('search term', term); //debug
   if( term ) {
     msg = 'loading...';
     currentSearch = api.createTrendsSearch(term);
     currentSearch.run()
       .then(applyTrendsSearch, function(err) {
+        console.log('search error', err); //debug
         if( err !== 'canceled' ) {
+          $ul.empty().append('<li>'+err+'</li>');
           err(err);
         }
       });
@@ -99,11 +108,11 @@ var updateTrendsSearch = $.debounce(500, function() {
 });
 
 function applyTrendsSearch(hits) {
+  console.log('applyTrendsSearch', hits); //debugs
   currentSearch = null;
-  var $sim = $('#similar-trends');
-  var $urlList = $sim.find('ul').first().empty();
+  var $urlList = $('#similar-trends').find('ul').empty();
   if( !hits || !hits.length ) {
-    $('<li>no results</li>').appendTo($urlList);
+    $('<li></li>').text('no results').appendTo($urlList);
   }
   else {
     $.each(hits, function(i,v) {
