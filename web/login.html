@@ -36,6 +36,7 @@
 
         console.log("User ID: " + user.uid + ", Provider: " + user.provider);
         createAccount(user);
+
       } else {
         authClient.login('google', {preferRedirect: true});
         // user is logged out
