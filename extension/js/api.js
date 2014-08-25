@@ -96,35 +96,35 @@
      * @returns promise resolved to the Firebase ref for the new entry
      */
     api.addEntry = function (shortName, userId, url) {
-      //todo prevent the same page from being added multiple times
-      //todo by adding an index of which pages were entered as an entry
-      //todo can hash the urls to make this simple and fast
-      var def = Q.defer();
       var ref = api.createRef('entries/' + shortName).push();
       var data = {
         source: url,
         userid: userId,
         timestamp: Firebase.ServerValue.TIMESTAMP
       };
-      ref.setWithPriority(data, Firebase.ServerValue.TIMESTAMP, function(err) {
-        if( err ) { def.reject(err); }
-        else {
-          api.createRef('trends/'+shortName+'/count').transaction(
-            function(curr) {
-              return (curr||0)+1;
-            },
-            function(err, success, snap) {
-              if( err || !success ) {
-                def.reject(err||'aborted');
-              }
-              else {
-                def.resolve(ref);
-              }
+      return createUrlIndexForEntry(url, ref.name())
+        .then(function() {
+          var def = Q.defer();
+          ref.setWithPriority(data, Firebase.ServerValue.TIMESTAMP, function(err) {
+            if( err ) { def.reject(err); }
+            else {
+              api.createRef('trends/'+shortName+'/count').transaction(
+                function(curr) {
+                  return (curr||0)+1;
+                },
+                function(err, success, snap) {
+                  if( err || !success ) {
+                    def.reject(err||'aborted');
+                  }
+                  else {
+                    def.resolve(ref);
+                  }
+                }
+              );
             }
-          );
-        }
-      });
-      return def.promise;
+          });
+          return def.promise;
+        });
     };
 
     /**
@@ -184,13 +184,14 @@
      *
      * @param {string} url
      * @param {string} userId
+     * @param {string} stealFrom a user id to steal this from
      * @returns promise that resolves to the Firebase ref for the ownership item, or rejected with code: 'OWNED', if it is already owned
      */
-    api.claimOwnership = function (url, userId) {
+    api.claimOwnership = function (url, userId, stealFrom) {
       var hash = api.createHashCode(url);
       var def = Q.defer();
       api.createRef('ownership/' + hash).transaction(function (currentVal) {
-        if (currentVal !== null) return;
+        if (currentVal !== null && currentVal !== stealFrom) return;
         else return userId;
       }, function (err, committed, snap) {
         if (err || !committed) {
@@ -218,6 +219,20 @@
     };
 
     /**
+     * Notify callback when this URL is added as an entry
+     * @param {string} url
+     * @param {function} callback
+     */
+    api.onEntryAdded = function(url, callback) {
+      var ref = api.createRef('entries_by_url/'+api.createHashCode(url));
+      var fn = ref.on('value', function(snap) {
+        if( snap.val() === null ) { return; }
+        ref.off('value', fn);
+        callback(snap.val());
+      });
+    };
+
+    /**
      * Parse document or contact an appropriate API and fetch the data for this particular case/discussion/etc.
      * Creates a POJO suitable for use in creating trends and entries, with the following key/value pairs:
      *    {string} type: one of desk, github, stackoverflow, googlegroup, or other
@@ -241,11 +256,13 @@
     api.createShortName = function (summary) {
       return summary
         .toLowerCase()
-        .replace(REGEX_ARTICLES, '')
         .replace(/[^\w\s]+/g, '')
-        .replace(/\s+/g, '-');
+        .replace(REGEX_ARTICLES, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .substr(0, 40);
     };
-    var REGEX_ARTICLES = /\b(is|a|about|after|an|and|at|by|for|from|in|into|nor|of|on|onto|over|the|to|up|with|within)\b/gi;
+    var REGEX_ARTICLES = /\b(its|this|how|do|i|is|a|about|after|an|and|at|by|for|from|in|into|nor|of|on|onto|over|the|to|up|with|within)\b/g;
 
     /**
      * Create a JavaScript hash code of a string (for creating keys from urls)
@@ -273,6 +290,17 @@
     };
 
     /**
+     * Fetch a user's record
+     */
+    api.getUser = function(uid) {
+      var def = Q.defer();
+      api.createRef('users/'+uid).once('value', function(snap) {
+        def.resolve(snap.val());
+      }, def.reject);
+      return def.promise;
+    };
+
+    /**
      * Provide a firebase callback compatible function and resolve/reject a
      * future when it is invoked.
      * @param def
@@ -285,6 +313,23 @@
         else { def.resolve(result); }
       }
     };
+
+    function createUrlIndexForEntry(url, key) {
+      var def = Q.defer();
+      var indexRef = api.createRef('entries_by_url/'+api.createHashCode(url));
+      indexRef.transaction(function(currValue) {
+        if( currValue !== null ) { return; }
+        return key;
+      }, function(err, success, snap) {
+        if (err || !success) {
+          def.reject(err || 'already_added');
+        }
+        else {
+          def.resolve(snap.ref());
+        }
+      });
+      return def.promise;
+    }
 
     /**
      * Perform a search of the trends/ table using ElasticSearch. Also includes a list of entries
@@ -332,7 +377,7 @@
       _doSearch: function(query) {
         var def = $.Deferred();
         var ref = new Firebase(URL+'/search');
-        var key = ref.child('request').push({ index: index, type: type, query: query }).name();
+        var key = ref.child('request').push({ index: 'firebase', type: 'trend', query: query }).name();
   //      console.log('search', key, { index: index, type: type, query: query });
         ref.child('response/'+key).on('value', function fn(snap) {
           if( snap.val() === null ) { return; }
@@ -357,7 +402,7 @@
           var promises = [];
           $.each(hits, function(k, hit) {
             promises.push($.Deferred(function(def) {
-              fb.child(hit.id).once('value', function(snap) {
+              fb.child(hit.id).endAt().limit(5).once('value', function(snap) {
                 hit.entries = snap.val() || {};
                 def.resolve();
               }, def.reject);

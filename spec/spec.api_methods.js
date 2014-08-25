@@ -106,7 +106,18 @@ exports.testAddEntry_hasPriority = function(test) {
     .done();
 };
 
-//todo exports.testAddEntry_nodups = function(test) {};
+exports.testAddEntry_mustBeUnique = function(test) {
+  test.expect(1);
+  api.addEntry('new-test1', 'kato', 'http://kato.com/1')
+    .then(function() {
+      return api.addEntry('new-test2', 'kato', 'http://kato.com/1')
+        .catch(function(err) {
+          test.equal(err, 'already_added');
+        })
+        .fin(test.done)
+    })
+    .done();
+};
 
 //exports.testGetOwner = function(test) {
 //  test.expect(1);
@@ -119,7 +130,7 @@ exports.testAddEntry_hasPriority = function(test) {
 //};
 
 exports.testCreateShortName = function(test) {
-  test.equal(api.createShortName('This is a bunch of text to test'), 'this-bunch-text-test');
+  test.equal(api.createShortName('This is a bunch of text to test'), 'bunch-text-test');
   test.done();
 };
 

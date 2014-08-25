@@ -1,6 +1,7 @@
 var authClient = null;
 var ref = new Firebase("https://trends.firebaseio.com");
 var currentUserId = null;
+var documentUrl = null;
 
 chrome.storage.local.remove(["firebaseAuthToken", "firebaseUid"]);
 
@@ -31,10 +32,12 @@ function onOpen($) {
   };
 
   function initPageEvents() {
+    $('#input_summary').on('keyup change blur paste', summaryChanged);
     $('#login').prop('disabled', true).text('logged in');
-    $('[data-target]').prop('disabled', false);
+    $('#similar-trends').on('click', '[data-event="plusOne"]', addEntry);
+    $('[data-target],[data-event]').prop('disabled', false);
     chrome.tabs.getSelected(null, function(tab) {
-      var url = tab.url;
+      var url = documentUrl = tab.url;
 
       $('#input_url').val(url);
 
@@ -42,12 +45,12 @@ function onOpen($) {
         chrome.tabs.executeScript(null, { file: 'js/stackoverflow_parser.js' }, populateExtension);
       }
 
-      $('#input_summary').on('keyup change blur paste', populateShortName);
       $('[data-target]').click(openView);
       $('form[data-event="addTrend"]').submit(addTrend);
-      var $button = $('[data-target="ownThis"]');
+      var $button = $('[data-event="ownThis"]');
       watchOwnership($button, url);
-      $button.click(ownPage.bind(null, url));
+      $button.click(ownPage.bind(null, $button, url));
+      watchUrlEntry(url);
     });
   }
 
@@ -58,7 +61,12 @@ function populateExtension(results) {
   var summary = results[0].summary;
   $("#input_summary").val(summary);
   $("#input_tags").val(results[0].tags.join(','));
+  summaryChanged();
+}
+
+function summaryChanged() {
   populateShortName();
+  updateTrendsSearch();
 }
 
 function populateShortName() {
@@ -66,8 +74,82 @@ function populateShortName() {
   $('#input_shortname').val(api.createShortName(summary));
 }
 
+var currentSearch = null;
+var updateTrendsSearch = $.debounce(500, function() {
+  var msg;
+  var $ul = $('#similar-trends').find('ul').first().empty();
+  if( currentSearch ) {
+    currentSearch.cancel();
+  }
+  var term = $('#input_summary').val();
+  if( term ) {
+    msg = 'loading...';
+    currentSearch = api.createTrendsSearch(term);
+    currentSearch.run()
+      .then(applyTrendsSearch, function(err) {
+        if( err !== 'canceled' ) {
+          err(err);
+        }
+      });
+  }
+  else {
+    msg = 'no results';
+  }
+  $ul.append('<li>'+msg+'</li>');
+});
+
+function applyTrendsSearch(hits) {
+  currentSearch = null;
+  var $sim = $('#similar-trends');
+  var $urlList = $sim.find('ul').first().empty();
+  if( !hits || !hits.length ) {
+    $('<li>no results</li>').appendTo($urlList);
+  }
+  else {
+    $.each(hits, function(i,v) {
+      var $outerLi = $('<li></li>')
+        .attr('data-id', v.id)
+        .append('<button role="button" data-event="plusOne">+</button>')
+        .append( $('<header></header>').text(v.summary + '(' + v.count + ')') )
+        .appendTo( $urlList );
+      if(v.entries && Object.keys(v.entries).length) {
+        var $innerUl = $('<ul></ul>')
+          .appendTo($outerLi);
+        $.each(v.entries, function(k,e) {
+          var $li = $('<li></li>').appendTo($innerUl);
+          if(e.source && e.source.match(/^(http|www\.)/)) {
+            var shortUrl = e.source.length > 40? e.source.substr(0, 40)+'...' : e.source;
+            $('<a></a>')
+              .attr('href', e.source)
+              .attr('target', '_blank')
+              .text(shortUrl)
+              .attr('title', e.source)
+              .appendTo($li);
+          }
+          else {
+            $('<p></p>').text(e.source|| e.userid).appendTo($li);
+          }
+          if(e.comment) {
+            $('<p></p>').text(e.comment).appendTo($li);
+          }
+        });
+      }
+    });
+  }
+}
+
 function doLogin() {
   chrome.tabs.create({url: window.loginUrl});
+}
+
+function addEntry(e) {
+  assertLoggedIn();
+  e.preventDefault();
+  var trendId = $(this).closest('[data-id]').attr('data-id');
+  api.addEntry(trendId, currentUserId, documentUrl/*, comment */)
+    .then(function() {
+      msg('+1! URL added to trend')
+    }, err);
 }
 
 function addTrend(e) {
@@ -97,20 +179,44 @@ function addTrend(e) {
 
 function watchOwnership($button, url) {
   assertLoggedIn();
-  api.onOwnerChange(url, function(owner) {
-    if( owner ) {
-      $button.prop('disabled', true).text('<owned by '+owner+'>');
-      $('[data-view="ownThis"] p').text('Owned by '+owner);
+  api.onOwnerChange(url, function(uid) {
+    confirmSteal = false;
+    $button.removeClass('owned by-me');
+    if( uid ) {
+      $button.data('owner', uid);
+      if( uid === currentUserId ) {
+        $button.prop('disabled', true).text('I own this');
+      }
+      else {
+        api.getUser(uid).then(function(user) {
+          $button.prop('disabled', false).addClass('owned').text('Steal from '+(user||{name: '<user not found>'}).name);
+        });
+      }
     }
     else {
       $button.prop('disabled', false).text('Own This');
-      $('[data-view="ownThis"] p').text('Claiming...');
     }
   })
 }
 
-function ownPage(url) {
+function watchUrlEntry(url) {
+  api.onEntryAdded(url, function() {
+    $('[data-target="addTrend"]').prop('disabled', true).text('Added to trends');
+    $('#similar-trends').addClass('exists');
+  });
+}
+
+var confirmSteal = null;
+function ownPage($button, url) {
+  if( $button.hasClass('owned') && !confirmSteal ) {
+    confirmSteal = true;
+    $button.text('Click again to confirm');
+    return;
+  }
   assertLoggedIn();
+  $button.prop('disabled', true);
+  api.claimOwnership(url, currentUserId, confirmSteal? $button.data('owner') : null)
+    .then(function() { msg('You own it now'); }, err);
 }
 
 function openView() {

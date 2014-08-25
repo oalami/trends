@@ -38,7 +38,9 @@ form label input {
 }
 
 nav {
-    margin-top: 20px;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
 }
 
 nav button {
@@ -53,4 +55,51 @@ nav button {
 #messages li.error {
     color: #8a0000;
     background-color: #ffffb2;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul li {
+    display: block;
+    padding: 4px;
+}
+
+#similar-trends > ul > li {
+  border-bottom: 1px solid #aaa;
+  margin-bottom: 5px;
+}
+
+#similar-trends > ul > li > header {
+    font-weight: bold;
+}
+
+#similar-trends [data-event="plusOne"] {
+   float: right;
+   clear: both;
+   margin: 2px;
+   font-size: 24px;
+}
+
+#similar-trends.exists [data-event="plusOne"] {
+    display: none;
+}
+
+h3 {
+    background-color: #fafafa;
+    border-color: #aaa;
+    border-style: solid;
+    border-width: 1px 0;
+    padding: 4px;
+}
+
+button.owned {
+    color: red;
+}
+
+button.owned.by-me {
+    color: green;
 }

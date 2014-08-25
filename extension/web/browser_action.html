@@ -7,24 +7,24 @@
 <body>
 
 <div id="mainPopup">
-  <div data-view="home">
-    <button data-target="ownThis" disabled="disabled">Own This</button>
+  <nav>
+    <button data-event="ownThis" disabled="disabled">Own This</button>
     <button data-target="addTrend" disabled="disabled">Add Trend</button>
-  </div>
-  <div data-view="ownThis" class="hide">
-    <p>Claiming...</p>
-  </div>
+    <button id="login">log in</button>
+    <a href="https://trends.firebaseapp.com" target="_blank">view trends</a>
+  </nav>
+  <div data-view="home"></div>
   <div data-view="addTrend" class="hide">
-    <h1>Add a trend item</h1>
+    <h3>Add a trend item</h3>
 
     <form data-event="addTrend">
       <textarea id="input_summary" style="width: 90%; min-height: 50px"></textarea><br/>
       <label>
         <span>Short Name</span>
-        <input type="text" id="input_shortname" placeholder="summary-of-trend" />
+        <input type="text" id="input_shortname" placeholder="summary-of-trend" maxlength="50" />
       </label>
       <label>
-        <span>URL</span>
+        <span>URL/source</span>
         <input type="text" id="input_url" placeholder="http://..." />
       </label>
       <label>
@@ -32,20 +32,24 @@
         <input type="text" id="input_tags" placeholder="type to search..." />
       </label>
       <button type="submit">Create New Trend</button>
+      <a href="#" data-target="home" disabled="disabled" data-event="all-views" class="hide">cancel</a>
     </form>
   </div>
-  <nav>
-    <button id="login">log in</button>
-    <button data-target="home" disabled="disabled" data-event="all-views" class="hide">cancel</button>
-    <a href="https://trends.firebaseapp.com" target="_blank">view trends</a>
-  </nav>
   <ul id="messages"></ul>
+
+  <div id="similar-trends">
+    <h3>Similar Trends</h3>
+    <ul>
+      <li>loading...</li>
+    </ul>
+  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/q.js/1.0.1/q.js"></script>
 <script src="https://cdn.firebase.com/js/client/1.0.19/firebase.js"></script>
 <script src="https://cdn.firebase.com/js/simple-login/1.6.3/firebase-simple-login.js"></script>
+<script src="../lib/jquery.debounce.js"></script>
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/browser_action.js"></script>
