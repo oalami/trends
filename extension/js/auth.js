@@ -6,8 +6,6 @@ var checker = function() {
   firebaseUid = $('#firebaseUid').text();
 
   if(firebaseAuthToken != '') {
-    console.log('setting uid ' + firebaseUid);
-    console.log('setting authToken ' + firebaseAuthToken);
     chrome.storage.local.set({firebaseAuthToken: firebaseAuthToken, firebaseUid: firebaseUid});
     clearTimeout(intervalId);
     window.close();
