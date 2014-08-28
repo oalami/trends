@@ -4,7 +4,9 @@ var documentUrl = null;
 
 function onOpen($) {
   function handleAuthDataChanged(authToken, uid) {
-    if(authToken != null && authToken != '') {
+    if(authToken && uid && authToken != '' && uid != '') {
+      $("#login").prop("disabled",true);
+      $("#login").text("logging in...");
       currentUserId = uid;
       ref.auth(authToken, function(err) {
         if( err ) {
@@ -13,6 +15,7 @@ function onOpen($) {
         }
         else {
           initPageEvents();
+          $("#login").prop("disabled",false);
           $("#login").hide();
         }
       });
@@ -25,15 +28,13 @@ function onOpen($) {
     });
 
     chrome.storage.local.get(['firebaseAuthToken', 'firebaseUid'], function(items) {
-      var authToken = items.firebaseAuthToken;
-      var uid = items.firebaseUid;
+      var authToken = items.firebaseAuthToken || null;
+      var uid = items.firebaseUid || null;
       handleAuthDataChanged(authToken, uid);
     });
 
     chrome.storage.onChanged.addListener(function(changes, namespace) {
-      if(changes.firebaseAuthToken && changes.firebaseUid) {
-        handleAuthDataChanged(changes.firebaseAuthToken, changes.firebaseUid);
-      }
+      handleAuthDataChanged(changes.firebaseAuthToken.newValue, changes.firebaseUid.newValue);
     });
   }
 

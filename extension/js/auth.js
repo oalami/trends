@@ -10,7 +10,9 @@ var checker = function() {
     console.log('setting authToken ' + firebaseAuthToken);
     chrome.storage.local.set({firebaseAuthToken: firebaseAuthToken, firebaseUid: firebaseUid});
     clearTimeout(intervalId);
+    window.close();
   }
 };
 
 intervalId = setTimeout(checker, 1000);
+
