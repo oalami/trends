@@ -3,14 +3,36 @@
 <head lang="en">
   <meta charset="UTF-8">
   <title>Firebase Trends</title>
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
 </head>
 <body>
 
-<pre>Will view the trends here</pre>
+<div class="container">
+    <br /> <br />
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Summary</th>
+                <th>Tags</th>
+                <th>Count</th>
+            </tr>
+            </thead>
+            <tbody id="tbody">
+
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <script src="https://cdn.firebase.com/js/client/1.0.18/firebase.js"></script>
 <script src="https://cdn.firebase.com/js/simple-login/1.6.1/firebase-simple-login.js"></script>
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-<script src="../extension/web/app.js"></script>
+<script>
+    window.instance = 'trends';
+</script>
+<script src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
