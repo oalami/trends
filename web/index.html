@@ -7,32 +7,107 @@
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
 </head>
 <body>
+<br /> <br />
 
-<div class="container">
-    <br /> <br />
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Summary</th>
-                <th>Tags</th>
-                <th>Count</th>
-            </tr>
-            </thead>
-            <tbody id="tbody">
+<div id="app" class="container">
 
-            </tbody>
-        </table>
-    </div>
 </div>
+
+<script id="index" type="text/template">
+  <div class="responsive-table">
+    <table id="trendsTable" class="table table-striped">
+      <thead>
+      <tr>
+        <th>Summary</th>
+        <th>Tags</th>
+        <th>Count</th>
+        <th>Last</th>
+        <th>Details</th>
+      </tr>
+      </thead>
+
+    </table>
+  </div>
+</script>
+
+
+<script id="trendTemplate" type="text/template">
+
+    <td>
+      <%=summary%>
+    </td>
+    <td>
+      <%=tags%>
+    </td>
+    <td>
+      <%=count%>
+    </td>
+    <td>
+
+    </td>
+    <td>
+      <a href="#details/<%=encodeURI(summary)%>" class="btn btn-primary">Details</a>
+    </td>
+
+</script>
+
+<script id="detailsTemplate" type="text/template">
+  <h2>Hi</h2>
+</script>
 
 <script src="https://cdn.firebase.com/js/client/1.0.18/firebase.js"></script>
 <script src="https://cdn.firebase.com/js/simple-login/1.6.1/firebase-simple-login.js"></script>
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="lib/dataTable.min.js"></script>
 <script>
     window.instance = 'trends';
 </script>
-<script src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
-<script src="app.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone.js"></script>
+<script src="//cdn.firebase.com/libs/backfire/0.3.0/backbone-firebase.js"></script>
+
+<script src="app/trends.js"></script>
+<script src="app/utils.js"></script>
+<script src="app/data.js"></script>
+<script src="app/routes.js"></script>
+<script src="app/models.js"></script>
+<script src="app/collections.js"></script>
+<script src="app/views.js"></script>
+
+<script>
+  (function(Trends) {
+    "use strict";
+
+    ///// Backbone Models
+    //
+    // Trend
+    // - Summary
+    // - Tags
+    // - Count
+    // - Recent Date
+    //
+    // TrendDetail
+    // - Summary
+    // - Tags
+    // - Count
+    // - Recent Date
+    // - Entries
+    //
+    // TrendEdit
+    // - Bind fields to sync with Firebase
+
+    ///// Views
+    // TrendView
+    // - Summary
+    // - Tags
+    // - Count
+    // - Recent Date
+    // - Details
+    // - Edit
+
+    Trends.init();
+
+  }(window.Trends));
+</script>
 </body>
 </html>

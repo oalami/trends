@@ -13,8 +13,11 @@ jQuery(function($) {
      */
     function getTrendData(onComplete) {
         var allTheTags = {};
+
+        // grab the tagsRef
         tagsRef.once('value', function(snap) {
 
+            // loop through each tag to get the trend keys
             snap.forEach(function(snapTag) {
                 var tagKey = snapTag.name();
 
@@ -80,7 +83,7 @@ jQuery(function($) {
         return '<td>' + val + '</td>';
     }
 
-    getTrendData(function renderChart(trends) {
+    getTrendData(function renderPage(trends) {
         var rows = [];
         Object.keys(trends).forEach(function(trend) {
             rows.push(makeRow(trends[trend]));
