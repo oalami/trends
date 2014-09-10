@@ -102,7 +102,7 @@
         userid: userId,
         timestamp: Firebase.ServerValue.TIMESTAMP
       };
-      return createUrlIndexForEntry(url, ref.name())
+      return createUrlIndexForEntry(url, ref.name(), shortName)
         .then(function() {
           var def = Q.defer();
           ref.setWithPriority(data, Firebase.ServerValue.TIMESTAMP, function(err) {
@@ -207,15 +207,19 @@
     /**
      * @param {string} url
      * @param {function} callback
-     * @returns promise that resolves to a user id or null (if not owned)
+     * @returns {function} a dispose method to stop listening
      */
     api.onOwnerChange = function (url, callback) {
       var hash = api.createHashCode(url);
-      api.createRef('ownership/' + hash).on('value', function (snap) {
+      var ref = api.createRef('ownership/' + hash);
+      var fn = ref.on('value', function (snap) {
         callback(snap.val());
       }, function(err) {
         throw new Error(err);
       });
+      return function() {
+        ref.off('value', fn);
+      }
     };
 
     /**
@@ -230,6 +234,22 @@
         ref.off('value', fn);
         callback(snap.val());
       });
+    };
+
+    /**
+     * Notifies whenever the trend is changed
+     * @param {string} shortName
+     * @param {function} callback
+     * @returns {function} a dispose method to stop listening
+     */
+    api.onTrendChange = function(shortName, callback) {
+      var ref = api.createRef('trends/'+shortName);
+      var fn = ref.on('value', function(snap) {
+        callback(snap.val(), ref);
+      });
+      return function() {
+        ref.off('value', fn);
+      }
     };
 
     /**
@@ -314,9 +334,19 @@
       }
     };
 
-    function createUrlIndexForEntry(url, key) {
+    api.getTrendForUrl = function(url) {
       var def = Q.defer();
-      var indexRef = api.createRef('entries_by_url/'+api.createHashCode(url));
+      api.createRef('trends_by_url/'+api.createHashCode(url))
+        .once('value', function(snap) {
+          def.resolve(snap.val());
+        }, def.reject);
+      return def.promise;
+    };
+
+    function createUrlIndexForEntry(url, key, shortName) {
+      var def = Q.defer();
+      var hash = api.createHashCode(url);
+      var indexRef = api.createRef('entries_by_url/'+hash);
       indexRef.transaction(function(currValue) {
         if( currValue !== null ) { return; }
         return key;
@@ -325,6 +355,7 @@
           def.reject(err || 'already_added');
         }
         else {
+          api.createRef('trends_by_url/'+hash).set(shortName);
           def.resolve(snap.ref());
         }
       });

@@ -57,10 +57,10 @@
         },
 
         render: function() {
-            var trendBody = new TrendBody({ collection: this.collection });
             if(this.tbody) {
                 this.tbody.$el.remove();
             }
+            var trendBody = new TrendBody({ collection: this.collection });
             this.tbody = trendBody;
             this.$el.append(this.tbody.el);
             this.$el.dataTable();
@@ -73,12 +73,31 @@
 
         initialize: function() {
             this.render();
-            //this.listenTo(this.model, 'change', this.addOne);
         },
 
         render: function() {
-            console.log(this.template());
             this.$el.html(this.template());
+            this.$entryList = this.$el.children().children('#entryList');
+            console.log(this.$entryList);
+            this.collection.each(function(entry) {
+               this.$entryList.append(new EntryView({ model: entry }).el);
+            }, this);
+            return this;
+        }
+
+    });
+
+    var EntryView = Backbone.View.extend({
+        tagName: 'tr',
+        template: template('entryTemplate'),
+
+        initialize: function() {
+            this.render();
+        },
+
+        render: function() {
+            console.log(this.model.toJSON());
+            this.$el.append(this.template(this.model.toJSON()));
             return this;
         }
 
@@ -102,14 +121,18 @@
             this.cleanUp();
 
             this.$el.html(template('index')());
+
             var trendTable = new Trends.Views.Table();
 
         },
 
         showDetails: function (id) {
             this.cleanUp();
-            this.$el.html(new DetailsView().el);
-            console.log(id);
+            Trends.Data.getTrendEntries(id).then(function(entries) {
+                var entriesArray = Trends.Utils.jsonToArray(entries);
+                var trendsCollection = new Trends.Collections.Trends(entriesArray);
+                this.$el.html(new DetailsView({ collection: trendsCollection }).el);
+            }.bind(this));
         },
 
         cleanUp: function() {

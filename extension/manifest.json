@@ -21,6 +21,10 @@
   },
   "content_scripts": [
     {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["js/background.js"]
+    },
+    {
       "matches": ["http://localhost:3000/login.html"],
       "js": ["js/auth.js", "lib/jquery-2.1.1.min.js"]
     },
@@ -29,15 +33,18 @@
       "js": ["js/auth.js", "lib/jquery-2.1.1.min.js"]
     }
   ],
+  "background": {
+    "page": "web/background.html"
+  },
   "permissions": [
     "declarativeContent",
+    "tabs",
+    "storage",
+    "*://cdn.firebase.com/*",
     "*://firebase.desk.com/*",
     "*://groups.google.com/forum*",
     "*://stackoverflow.com/questions*",
     "*://twitter.com/*",
-    "*://localhost:3000/*",
-    "https://trends.firebaseapp.com/login.html",
-    "tabs",
-    "storage"
+    "https://trends.firebaseapp.com/*"
   ]
 }

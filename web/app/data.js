@@ -1,5 +1,6 @@
 (function(window, Trends, Firebase) {
 
+
     /*
      Make an object of trends with their tags
      {
@@ -48,14 +49,36 @@
      }
      */
      function getTrends(trendsRef, allTheTags, onComplete) {
+        var allTheTrends = {};
 
         trendsRef.on('value', function(snap) {
 
-            resolve(allTheTags, snap).then(function(allTheTrends) {
+            snap.forEach(function(ss) {
+                var trendObject = ss.val();
+                var trendName = ss.name();
 
-                if(onComplete) {
-                    onComplete.call(this, allTheTrends);
-                }
+                trendObject.tags = allTheTags[trendName]||[];
+                allTheTrends[trendName] = trendObject;
+                allTheTrends[trendName].id = trendName;
+
+            });
+
+            if (onComplete) {
+                onComplete.call(this, allTheTrends);
+            }
+        });
+
+    }
+
+    function getLatest(ref, trends, onComplete) {
+
+        Object.keys(trends).forEach(function(trendName) {
+
+            ref.child(trendName).limit(1).once('value', function(snap) {
+
+                snap.forEach(function(ss) {
+                    trends[trendName].last = ss.val().timestamp;
+                });
 
             });
 
@@ -63,27 +86,15 @@
 
     }
 
-    function resolve (allTheTags, snap) {
-        var snapPromise = $.Deferred(),
-            allTheTrends = {};
+    function getTrendEntries(id) {
+        var defer = $.Deferred();
+        var entryRef = new Firebase('https://' + window.instance + '.firebaseio.com/entries');
 
-        snap.forEach(function(ss) {
-            var trendObject = ss.val();
-            var trendName = ss.name();
-            var trendPromise = $.Deferred();
-
-            trendObject.tags = allTheTags[trendName]||[];
-            allTheTrends[trendName] = trendObject;
-
+        entryRef.child(id).once('value', function(snap) {
+            defer.resolve(snap.val());
         });
 
-        snapPromise.resolve(allTheTrends);
-
-        return snapPromise.promise();
-    }
-
-    function getTrendEntries(id) {
-
+        return defer.promise();
     }
 
     Trends.Data = {
