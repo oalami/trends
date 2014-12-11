@@ -88,9 +88,9 @@
 <script>
     window.instance = 'trends';
 </script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone.js"></script>
-<script src="//cdn.firebase.com/libs/backfire/0.3.0/backbone-firebase.js"></script>
+<script src="//cdn.firebase.com/libs/backbonefire/0.5.0/backbonefire.js"></script>
 
 <script src="app/trends.js"></script>
 <script src="app/utils.js"></script>
@@ -99,39 +99,23 @@
 <script src="app/models.js"></script>
 <script src="app/collections.js"></script>
 <script src="app/views.js"></script>
+<script src="app/controller.js"></script>
 
 <script>
   (function(Trends) {
     "use strict";
 
-    ///// Backbone Models
-    //
-    // Trend
-    // - Summary
-    // - Tags
-    // - Count
-    // - Recent Date
-    //
-    // TrendDetail
-    // - Summary
-    // - Tags
-    // - Count
-    // - Recent Date
-    // - Entries
-    //
-    // TrendEdit
-    // - Bind fields to sync with Firebase
+    $(document).ready(function(){
+      var app = {
+        views: {},
+        collections: {},
+        models: {}
+      };
 
-    ///// Views
-    // TrendView
-    // - Summary
-    // - Tags
-    // - Count
-    // - Recent Date
-    // - Details
-    // - Edit
-
-    Trends.init();
+      //START APP & ROUTER
+      app.views.controller = new Trends.Views.Controller();
+      Backbone.history.start();
+    });
 
   }(window.Trends));
 </script>

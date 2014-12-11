@@ -13,7 +13,7 @@
         var tagsRef = new Firebase('https://' + window.instance + '.firebaseio.com/tags');
 
         // grab the tags
-        tagsRef.on('value', function(snap) {
+        tagsRef.once('value', function(snap) {
             // loop through each tag to get the trend keys
             snap.forEach(function(snapTag) {
                 var tagKey = snapTag.name();
