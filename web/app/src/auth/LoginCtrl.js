@@ -6,7 +6,7 @@
   app.controller('LoginCtrl', function($scope, $window, Auth, routeTo) {
     // Change status of message screen based on passed ENUM
     // Can provide custom message if desired
-    this.changeStatus = function changeStatus(status, msg) {
+    function changeStatus(status, msg) {
       var returnStatus;
 
       returnStatus = {
