@@ -3,3 +3,5 @@
 .idea
 extension.crx
 extension.pem
+node_modules
+bower_components

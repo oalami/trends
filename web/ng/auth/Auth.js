@@ -19,6 +19,18 @@
         });
 
         return deferred.promise;
+      },
+      STATUS: {
+        ANON: 'ANON',
+        SUCCESS: 'SUCCESS',
+        ERROR: 'ERROR',
+        UNK: 'UNK'
+      },
+      STATUS_MESSAGE: {
+        ANON: 'Attempting to Log In...',
+        SUCCESS: 'Logging In...',
+        ERROR: 'Error logging in.',
+        UNK: 'Unknown error.'
       }
     };
   });

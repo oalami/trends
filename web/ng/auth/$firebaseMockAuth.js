@@ -11,7 +11,7 @@
 
   .constant('MockLoginError', false)
 
-  .constant('MockUser', false)
+  .constant('MockUser', user)
 
   .constant('MockUserError', 'Invalid Email')
 

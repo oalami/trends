@@ -7,13 +7,15 @@
     $routeProvider
       .when('/', {
         controller: 'LoginCtrl',
-        templateUrl: 'views/login.html',
-        authRequired: false
+        templateUrl: 'views/login.html'
       })
       .when('/trends', {
         controller: 'TrendsCtrl',
         templateUrl: 'views/trends.html',
         authRequired: true
+      })
+      .when('/404', {
+        templateUrl: 'misc/404.html'
       })
       .otherwise('/404');
   })

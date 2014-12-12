@@ -1,0 +1,28 @@
+{
+  "name": "web-trends",
+  "version": "0.0.0",
+  "homepage": "https://github.com/oalami/trends",
+  "authors": [
+    "David East <david@firebase.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "angular": "~1.3.6"
+  },
+  "dependencies": {
+    "angular-route": "~1.3.6",
+    "firebase": "~2.0.6",
+    "angularfire": "~0.9.0",
+    "jquery": "~2.1.1",
+    "angular-datatables": "~0.3.0",
+    "angular": "~1.3.6"
+  }
+}
