@@ -12,7 +12,13 @@
       .when('/trends', {
         controller: 'TrendsCtrl',
         templateUrl: 'views/trends.html',
-        authRequired: true
+        authRequired: true,
+        resolve: {
+          tagsArray: function(Tags, TagsRef) {
+            var $tagsArray = Tags(TagsRef);
+            return $tagsArray.$loaded();
+          }
+        }
       })
       .when('/404', {
         templateUrl: 'misc/404.html'
@@ -21,6 +27,10 @@
   })
 
   .constant('FBURL', 'https://trends.firebaseio.com/')
+
+  .constant('TAGS_URL', 'https://trends.firebaseio.com/tags')
+
+  .constant('TRENDS_URL', 'https://trends.firebaseio.com/trends')
 
   // Helper factory for changing routes
   .factory('routeTo', function($window) {
@@ -35,7 +45,12 @@
 
   .service('Root', ['FBURL', Firebase])
 
+  .service('TagsRef', ['TAGS_URL', Firebase])
+
+  .service('TrendsRef', ['TRENDS_URL', Firebase])
+
   .run(function($rootScope, routeTo) {
+    // if the user does not belong send the home
     $rootScope.$on('authRequired:unauthorized', function(e, name) {
       routeTo('/');
     });
@@ -259,8 +274,155 @@
 
   var app = config.app();
 
-  app.controller('TrendsCtrl', function() {
+  app.factory('$trends', function($firebase, Root) {
+    return function $trends(path) {
+      // if the path is provided then append and return binding
+      if(path) {
+        return $firebase(Root.child(path));
+      }
 
+      // if no path is provided return the binding from the Root ref
+      return $firebase(Root);
+    };
+  });
+
+}(angular, config));
+
+(function(angular, config) {
+  "use strict";
+
+  var app = config.app();
+
+  app.factory('Tags', function($FirebaseArray, $firebase, TrendsRef, $timeout) {
+
+    function getTrends(trendsRef, allTheTags, onComplete) {
+      var allTheTrends = {};
+
+      trendsRef.on('value', function(snap) {
+
+        snap.forEach(function(ss) {
+          var trendObject = ss.val();
+          var trendName = ss.key();
+
+          trendObject.tags = allTheTags[trendName]||[];
+          allTheTrends[trendName] = trendObject;
+          allTheTrends[trendName].id = trendName;
+
+        });
+
+        if (onComplete) {
+          $timeout(function() {
+            onComplete.call(this, allTheTrends);
+          });
+        }
+
+      });
+
+    }
+
+    var TagsFactory = $FirebaseArray.$extendFactory({
+      getTrends: function(onComplete) {
+        var allTheTags = [];
+        angular.forEach(this.$list, function(tag) {
+          // $id
+          var tagId = tag.$id;
+          angular.forEach(tag, function(value, key) {
+            if(key.indexOf('$') === 0) { return; } // no $ props
+
+            if(!allTheTags[key]) {
+              allTheTags[key] = [];
+            }
+
+            allTheTags[key].push(tagId);
+
+          });
+
+          getTrends(TrendsRef, allTheTags, onComplete);
+
+        });
+      }
+    });
+
+    return function(listRef) {
+      var sync = $firebase(listRef, {arrayFactory: TagsFactory});
+      return sync.$asArray();
+    }
+  });
+
+  // loop through each tag to get the trend keys
+  // snap.forEach(function(snapTag) {
+  //   var tagKey = snapTag.name();
+  //
+  //   snapTag.forEach(function (snapTrend) {
+  //     var trendKey = snapTrend.name();
+  //
+  //     if( !allTheTags[trendKey] ) {
+  //       allTheTags[trendKey] = [];
+  //     }
+  //
+  //     allTheTags[trendKey].push(tagKey);
+  //   });
+  //
+  // });
+
+  app.factory("ListWithTotal", ["$FirebaseArray", "$firebase", function($FirebaseArray, $firebase) {
+    // create a new factory based on $FirebaseArray
+    var TotalFactory = $FirebaseArray.$extendFactory({
+      getTotal: function() {
+        debugger;
+        var total = 0;
+        // the array data is located in this.$list
+        angular.forEach(this.$list, function(rec) {
+          total += rec.amount;
+        });
+        return total;
+      }
+    });
+
+    return function(listRef) {
+      // override the factory used by $firebase
+      var sync = $firebase(listRef, {arrayFactory: TotalFactory});
+
+      return sync.$asArray(); // this will be an instance of TotalFactory
+    }
+  }]);
+
+}(angular, config));
+
+(function(angular, config) {
+  "use strict";
+
+  var app = config.app();
+
+  app.controller('TrendsCtrl', function($scope, Tags, Root, $timeout, tagsArray) {
+    
+    $scope.tagsArray = tagsArray;
+
+    // $tagsArray.$loaded().then(function(items) {
+    //   $tagsArray.getTrends(function(trends) {
+    //     $scope.trends = trends;
+    //   });
+    // });
+
+  });
+
+}(angular, config));
+
+(function(angular, config) {
+  "use strict";
+
+  var app = config.app();
+
+  app.directive('trendsTable', function($compile) {
+    return {
+      restrict: 'EA',
+      transclude: true,
+      template: '',
+      link: function (scope, element) {
+        debugger;
+        //element.dataTable();
+      }
+    };
   });
 
 }(angular, config));

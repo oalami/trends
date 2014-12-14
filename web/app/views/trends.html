@@ -1,1 +1,35 @@
-<h1>Trends!</h1>
+<div class="responsive-table">
+
+  <table trends-table="" id="trendsTable" class="table table-striped">
+    <thead>
+      <tr>
+        <th>Summary</th>
+        <th>Tags</th>
+        <th>Count</th>
+        <th>Last</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+      <tbody>
+
+        <tr ng-repeat="trend in data">
+          <td>
+            {{trend.summary}}
+          </td>
+          <td>
+            {{trend.tags}}
+          </td>
+          <td>
+            {{trend.count}}
+          </td>
+          <td>
+
+          </td>
+          <td>
+            <a ng-href="/details/{{id}}>" class="btn btn-primary">Details</a>
+          </td>
+        </tr>
+
+      </tbody>
+  </table>
+</div>
