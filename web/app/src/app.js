@@ -14,14 +14,24 @@
         templateUrl: 'views/trends.html',
         authRequired: true,
         resolve: {
-          tagsArray: function(Tags, TagsRef) {
+          tags: function(Tags, TagsRef) {
             var $tagsArray = Tags(TagsRef);
             return $tagsArray.$loaded();
           }
         }
       })
+      .when('/entries/:id', {
+        controller: 'EntriesCtrl',
+        templateUrl: 'views/entries.html',
+        authRequired: true,
+        resolve: {
+          entries: function($entries, $route) {
+            return $entries($route.current.params.id).$asArray().$loaded();
+          }
+        }
+      })
       .when('/404', {
-        templateUrl: 'misc/404.html'
+        templateUrl: 'views/404.html'
       })
       .otherwise('/404');
   })

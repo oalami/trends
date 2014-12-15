@@ -3,11 +3,12 @@
 
   var app = config.app();
 
-  app.factory('$trends', function($firebase, Root) {
-    return function $trends(path) {
+  app.factory('$base', function($firebase, Root) {
+    return function $base(path) {
       // if the path is provided then append and return binding
       if(path) {
-        return $firebase(Root.child(path));
+        var $base = $firebase(Root.child(path));
+        return $base;
       }
 
       // if no path is provided return the binding from the Root ref

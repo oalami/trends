@@ -3,9 +3,9 @@
 
   var app = config.app();
 
-  app.controller('TrendsCtrl', function($scope, Tags, Root, $timeout, tagsArray) {
+  app.controller('TrendsCtrl', function($scope, tags) {
 
-    tagsArray.getTrends({
+    tags.getTrends({
       onComplete: function(trends) {
         $scope.trends = trends;
       }

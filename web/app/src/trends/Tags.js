@@ -60,42 +60,4 @@
     }
   });
 
-  // loop through each tag to get the trend keys
-  // snap.forEach(function(snapTag) {
-  //   var tagKey = snapTag.name();
-  //
-  //   snapTag.forEach(function (snapTrend) {
-  //     var trendKey = snapTrend.name();
-  //
-  //     if( !allTheTags[trendKey] ) {
-  //       allTheTags[trendKey] = [];
-  //     }
-  //
-  //     allTheTags[trendKey].push(tagKey);
-  //   });
-  //
-  // });
-
-  app.factory("ListWithTotal", ["$FirebaseArray", "$firebase", function($FirebaseArray, $firebase) {
-    // create a new factory based on $FirebaseArray
-    var TotalFactory = $FirebaseArray.$extendFactory({
-      getTotal: function() {
-        debugger;
-        var total = 0;
-        // the array data is located in this.$list
-        angular.forEach(this.$list, function(rec) {
-          total += rec.amount;
-        });
-        return total;
-      }
-    });
-
-    return function(listRef) {
-      // override the factory used by $firebase
-      var sync = $firebase(listRef, {arrayFactory: TotalFactory});
-
-      return sync.$asArray(); // this will be an instance of TotalFactory
-    }
-  }]);
-
 }(angular, config));

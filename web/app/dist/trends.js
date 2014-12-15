@@ -14,14 +14,24 @@
         templateUrl: 'views/trends.html',
         authRequired: true,
         resolve: {
-          tagsArray: function(Tags, TagsRef) {
+          tags: function(Tags, TagsRef) {
             var $tagsArray = Tags(TagsRef);
             return $tagsArray.$loaded();
           }
         }
       })
+      .when('/entries/:id', {
+        controller: 'EntriesCtrl',
+        templateUrl: 'views/entries.html',
+        authRequired: true,
+        resolve: {
+          entries: function($entries, $route) {
+            return $entries($route.current.params.id).$asArray().$loaded();
+          }
+        }
+      })
       .when('/404', {
-        templateUrl: 'misc/404.html'
+        templateUrl: 'views/404.html'
       })
       .otherwise('/404');
   })
@@ -257,7 +267,7 @@
     $rootScope.$on('$routeChangeStart', function(e, route) {
       var nextRoute = route.$$route;
       var user;
-      if(nextRoute.authRequired) {
+      if(nextRoute && nextRoute.authRequired) {
         user = auth.$getAuth();
         if(!user) {
           $rootScope.$emit('authRequired:unauthorized', new Error('Unauthorized access.'));
@@ -274,16 +284,42 @@
 
   var app = config.app();
 
-  app.factory('$trends', function($firebase, Root) {
-    return function $trends(path) {
+  app.factory('$base', function($firebase, Root) {
+    return function $base(path) {
       // if the path is provided then append and return binding
       if(path) {
-        return $firebase(Root.child(path));
+        var $base = $firebase(Root.child(path));
+        return $base;
       }
 
       // if no path is provided return the binding from the Root ref
       return $firebase(Root);
     };
+  });
+
+}(angular, config));
+
+(function(angular, config) {
+  "use strict";
+
+  var app = config.app();
+
+  app.factory('$entries', function($base) {
+    return function $entries (id) {
+      return $base('/entries/' + id);
+    };
+  });
+
+}(angular, config));
+
+(function(angular, config) {
+  "use strict";
+
+  var app = config.app();
+
+  app.controller('EntriesCtrl', function($scope, entries) {
+    console.log(entries);
+    $scope.entries = entries;
   });
 
 }(angular, config));
@@ -350,44 +386,6 @@
     }
   });
 
-  // loop through each tag to get the trend keys
-  // snap.forEach(function(snapTag) {
-  //   var tagKey = snapTag.name();
-  //
-  //   snapTag.forEach(function (snapTrend) {
-  //     var trendKey = snapTrend.name();
-  //
-  //     if( !allTheTags[trendKey] ) {
-  //       allTheTags[trendKey] = [];
-  //     }
-  //
-  //     allTheTags[trendKey].push(tagKey);
-  //   });
-  //
-  // });
-
-  app.factory("ListWithTotal", ["$FirebaseArray", "$firebase", function($FirebaseArray, $firebase) {
-    // create a new factory based on $FirebaseArray
-    var TotalFactory = $FirebaseArray.$extendFactory({
-      getTotal: function() {
-        debugger;
-        var total = 0;
-        // the array data is located in this.$list
-        angular.forEach(this.$list, function(rec) {
-          total += rec.amount;
-        });
-        return total;
-      }
-    });
-
-    return function(listRef) {
-      // override the factory used by $firebase
-      var sync = $firebase(listRef, {arrayFactory: TotalFactory});
-
-      return sync.$asArray(); // this will be an instance of TotalFactory
-    }
-  }]);
-
 }(angular, config));
 
 (function(angular, config) {
@@ -395,9 +393,9 @@
 
   var app = config.app();
 
-  app.controller('TrendsCtrl', function($scope, Tags, Root, $timeout, tagsArray) {
+  app.controller('TrendsCtrl', function($scope, tags) {
 
-    tagsArray.getTrends({
+    tags.getTrends({
       onComplete: function(trends) {
         $scope.trends = trends;
       }

@@ -1,0 +1,32 @@
+<table class="table table-striped">
+  <thead>
+    <th>
+      Summary
+    </th>
+    <th>
+      Date
+    </th>
+    <th>
+      User
+    </th>
+    <th>
+      Source
+    </th>
+  </thead>
+  <tbody>
+    <tr ng-repeat="entry in entries">
+      <td>
+        {{entry.summary}}
+      </td>
+      <td>
+        {{entry.timestamp}}
+      </td>
+      <td>
+        {{entry.userid}}
+      </td>
+      <td>
+        <a ng-href="{{entry.source}}" target="_blank">Source</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
