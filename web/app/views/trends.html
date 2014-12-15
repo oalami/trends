@@ -12,12 +12,12 @@
     </thead>
       <tbody>
 
-        <tr ng-repeat="trend in data">
+        <tr ng-repeat="trend in trends">
           <td>
             {{trend.summary}}
           </td>
           <td>
-            {{trend.tags}}
+            {{trend.tags.join(', ')}}
           </td>
           <td>
             {{trend.count}}

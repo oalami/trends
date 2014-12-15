@@ -297,8 +297,9 @@
 
     function getTrends(trendsRef, allTheTags, onComplete) {
       var allTheTrends = {};
+      var query = trendsRef.orderByKey();
 
-      trendsRef.on('value', function(snap) {
+      query.on('value', function(snap) {
 
         snap.forEach(function(ss) {
           var trendObject = ss.val();
@@ -321,7 +322,7 @@
     }
 
     var TagsFactory = $FirebaseArray.$extendFactory({
-      getTrends: function(onComplete) {
+      getTrends: function(params) {
         var allTheTags = [];
         angular.forEach(this.$list, function(tag) {
           // $id
@@ -337,7 +338,7 @@
 
           });
 
-          getTrends(TrendsRef, allTheTags, onComplete);
+          getTrends(TrendsRef, allTheTags, params.onComplete);
 
         });
       }
@@ -395,34 +396,13 @@
   var app = config.app();
 
   app.controller('TrendsCtrl', function($scope, Tags, Root, $timeout, tagsArray) {
-    
-    $scope.tagsArray = tagsArray;
 
-    // $tagsArray.$loaded().then(function(items) {
-    //   $tagsArray.getTrends(function(trends) {
-    //     $scope.trends = trends;
-    //   });
-    // });
-
-  });
-
-}(angular, config));
-
-(function(angular, config) {
-  "use strict";
-
-  var app = config.app();
-
-  app.directive('trendsTable', function($compile) {
-    return {
-      restrict: 'EA',
-      transclude: true,
-      template: '',
-      link: function (scope, element) {
-        debugger;
-        //element.dataTable();
+    tagsArray.getTrends({
+      onComplete: function(trends) {
+        $scope.trends = trends;
       }
-    };
+    });
+
   });
 
 }(angular, config));

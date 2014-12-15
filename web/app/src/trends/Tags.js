@@ -7,8 +7,9 @@
 
     function getTrends(trendsRef, allTheTags, onComplete) {
       var allTheTrends = {};
+      var query = trendsRef.orderByKey();
 
-      trendsRef.on('value', function(snap) {
+      query.on('value', function(snap) {
 
         snap.forEach(function(ss) {
           var trendObject = ss.val();
@@ -31,7 +32,7 @@
     }
 
     var TagsFactory = $FirebaseArray.$extendFactory({
-      getTrends: function(onComplete) {
+      getTrends: function(params) {
         var allTheTags = [];
         angular.forEach(this.$list, function(tag) {
           // $id
@@ -47,7 +48,7 @@
 
           });
 
-          getTrends(TrendsRef, allTheTags, onComplete);
+          getTrends(TrendsRef, allTheTags, params.onComplete);
 
         });
       }
