@@ -7,9 +7,8 @@
 
     function getTrends(trendsRef, allTheTags, onComplete) {
       var allTheTrends = {};
-      var query = trendsRef.orderByKey();
 
-      query.on('value', function(snap) {
+      trendsRef.on('value', function(snap) {
 
         snap.forEach(function(ss) {
           var trendObject = ss.val();

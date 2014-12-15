@@ -4,10 +4,15 @@
   var app = config.app();
 
   app.factory('$base', function($firebase, Root) {
-    return function $base(path) {
+    return function $base(path, factory) {
       // if the path is provided then append and return binding
       if(path) {
-        var $base = $firebase(Root.child(path));
+        var $base;
+        if(factory) {
+          $base = $firebase(Root.child(path), factory);
+        } else {
+          $base = $firebase(Root.child(path));
+        }
         return $base;
       }
 

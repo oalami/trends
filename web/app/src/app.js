@@ -42,6 +42,8 @@
 
   .constant('TRENDS_URL', 'https://trends.firebaseio.com/trends')
 
+  .constant('USERS_URL', 'https://trends.firebaseio.com/users')
+
   // Helper factory for changing routes
   .factory('routeTo', function($window) {
 
@@ -58,6 +60,8 @@
   .service('TagsRef', ['TAGS_URL', Firebase])
 
   .service('TrendsRef', ['TRENDS_URL', Firebase])
+
+  .service('UsersRef', ['USERS_URL', Firebase])
 
   .run(function($rootScope, routeTo) {
     // if the user does not belong send the home

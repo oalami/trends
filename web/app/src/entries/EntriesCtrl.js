@@ -4,8 +4,9 @@
   var app = config.app();
 
   app.controller('EntriesCtrl', function($scope, entries) {
-    console.log(entries);
-    $scope.entries = entries;
+    entries.getUserInfo().then(function(userEntries) {
+      $scope.entries = userEntries;
+    });
   });
 
 }(angular, config));

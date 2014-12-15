@@ -42,6 +42,8 @@
 
   .constant('TRENDS_URL', 'https://trends.firebaseio.com/trends')
 
+  .constant('USERS_URL', 'https://trends.firebaseio.com/users')
+
   // Helper factory for changing routes
   .factory('routeTo', function($window) {
 
@@ -58,6 +60,8 @@
   .service('TagsRef', ['TAGS_URL', Firebase])
 
   .service('TrendsRef', ['TRENDS_URL', Firebase])
+
+  .service('UsersRef', ['USERS_URL', Firebase])
 
   .run(function($rootScope, routeTo) {
     // if the user does not belong send the home
@@ -285,10 +289,15 @@
   var app = config.app();
 
   app.factory('$base', function($firebase, Root) {
-    return function $base(path) {
+    return function $base(path, factory) {
       // if the path is provided then append and return binding
       if(path) {
-        var $base = $firebase(Root.child(path));
+        var $base;
+        if(factory) {
+          $base = $firebase(Root.child(path), factory);
+        } else {
+          $base = $firebase(Root.child(path));
+        }
         return $base;
       }
 
@@ -304,10 +313,32 @@
 
   var app = config.app();
 
-  app.factory('$entries', function($base) {
+  app.factory('$entries', function($base, $FirebaseArray, UsersRef, $q) {
+
+    var EntriesFactory = $FirebaseArray.$extendFactory({
+
+      // Return the user info and the entry as one object
+      getUserInfo: function() {
+        var deferreds = [];
+        angular.forEach(this.$list, function(entry) {
+          var deferred = $q.defer();
+
+          UsersRef.child(entry.userid).once('value', function(snap) {
+            var entryUser = {};
+            angular.extend(entryUser, entry, snap.val());
+            deferred.resolve(entryUser);
+          });
+
+          deferreds.push(deferred.promise);
+        });
+        return $q.all(deferreds);
+      }
+    });
+
     return function $entries (id) {
-      return $base('/entries/' + id);
+      return $base('/entries/' + id, { arrayFactory: EntriesFactory });
     };
+
   });
 
 }(angular, config));
@@ -318,8 +349,9 @@
   var app = config.app();
 
   app.controller('EntriesCtrl', function($scope, entries) {
-    console.log(entries);
-    $scope.entries = entries;
+    entries.getUserInfo().then(function(userEntries) {
+      $scope.entries = userEntries;
+    });
   });
 
 }(angular, config));
@@ -333,9 +365,8 @@
 
     function getTrends(trendsRef, allTheTags, onComplete) {
       var allTheTrends = {};
-      var query = trendsRef.orderByKey();
 
-      query.on('value', function(snap) {
+      trendsRef.on('value', function(snap) {
 
         snap.forEach(function(ss) {
           var trendObject = ss.val();
