@@ -1,7 +1,7 @@
 (function(angular) {
   "use strict";
 
-  angular.module('trends', ['firebase', 'ngRoute', '$firebaseMockAuth', 'authRequired'])
+  angular.module('trends', ['firebase', 'ngRoute', 'authRequired'])
 
   .config(function($routeProvider) {
     $routeProvider

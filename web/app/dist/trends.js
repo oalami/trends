@@ -1,7 +1,7 @@
 (function(angular) {
   "use strict";
 
-  angular.module('trends', ['firebase', 'ngRoute', '$firebaseMockAuth', 'authRequired'])
+  angular.module('trends', ['firebase', 'ngRoute', 'authRequired'])
 
   .config(function($routeProvider) {
     $routeProvider
@@ -185,9 +185,10 @@
     var deferred = $q.defer();
     return {
       authWithGoogle: function() {
-        auth.$authWithOAuthRedirect('google').then(function(authData) {
+        auth.$authWithOAuthPopup('google', { scope: 'email' }).then(function(authData) {
+          debugger;
           var googleUser = authData.google;
-          if (!googleUser.email || !googleUser.email.match(/@firebase.com$/) ) {
+          if (!googleUser.email || !googleUser.email.match(/@google.com$/) ) {
             throw new Error('Invalid email; not a Firebase.com account');
           }
           deferred.resolve(authData);
@@ -204,7 +205,7 @@
         UNK: 'UNK'
       },
       STATUS_MESSAGE: {
-        ANON: 'Attempting to Log In...',
+        ANON: 'Log in',
         SUCCESS: 'Logging In...',
         ERROR: 'Error logging in.',
         UNK: 'Unknown error.'
@@ -231,6 +232,7 @@
   var app = config.app();
 
   app.controller('LoginCtrl', function($scope, $window, Auth, routeTo) {
+
     // Change status of message screen based on passed ENUM
     // Can provide custom message if desired
     function changeStatus(status, msg) {
@@ -247,13 +249,14 @@
     $scope.loginStatus = changeStatus(Auth.STATUS.ANON);
 
     Auth.authWithGoogle()
-      .then(function(user) {
-        $scope.loginStatus = changeStatus(Auth.STATUS.SUCCESS)
-        routeTo('/trends');
-      })
-      .catch(function(error) {
-        $scope.loginStatus = changeStatus(Auth.STATUS.ERROR, error.message);
-      });
+    .then(function(user) {
+      $scope.loginStatus = changeStatus(Auth.STATUS.SUCCESS)
+      routeTo('/trends');
+    })
+    .catch(function(error) {
+      $scope.loginStatus = changeStatus(Auth.STATUS.ERROR, error.message);
+    });
+    
   });
 
 }(window.angular, config));

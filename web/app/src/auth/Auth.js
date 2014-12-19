@@ -8,9 +8,10 @@
     var deferred = $q.defer();
     return {
       authWithGoogle: function() {
-        auth.$authWithOAuthRedirect('google').then(function(authData) {
+        auth.$authWithOAuthPopup('google', { scope: 'email' }).then(function(authData) {
+          debugger;
           var googleUser = authData.google;
-          if (!googleUser.email || !googleUser.email.match(/@firebase.com$/) ) {
+          if (!googleUser.email || !googleUser.email.match(/@google.com$/) ) {
             throw new Error('Invalid email; not a Firebase.com account');
           }
           deferred.resolve(authData);
@@ -27,7 +28,7 @@
         UNK: 'UNK'
       },
       STATUS_MESSAGE: {
-        ANON: 'Attempting to Log In...',
+        ANON: 'Log in',
         SUCCESS: 'Logging In...',
         ERROR: 'Error logging in.',
         UNK: 'Unknown error.'
