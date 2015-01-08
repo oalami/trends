@@ -1,6 +1,7 @@
 var ref = new Firebase("https://trends.firebaseio.com");
 var currentUserId = null;
 var documentUrl = null;
+var sessionName = "firebase:session::trends";
 
 function onOpen($) {
   function handleAuthDataChanged(authToken, uid) {
@@ -8,9 +9,9 @@ function onOpen($) {
       $("#login").prop("disabled",true);
       $("#login").text("logging in...");
       currentUserId = uid;
-      ref.auth(authToken, function(err) {
+      ref.authWithCustomToken(authToken, function(err, authData) {
         if( err ) {
-          chrome.storage.local.remove(["firebaseAuthToken", "firebaseUid"]);
+          chrome.storage.local.remove([sessionName]);
           err(err);
         }
         else {
@@ -27,7 +28,7 @@ function onOpen($) {
       chrome.tabs.create({url: window.loginUrl});
     });
 
-    chrome.storage.local.get(['firebaseAuthToken', 'firebaseUid'], function(items) {
+    chrome.storage.local.get([sessionName], function(items) {
       var authToken = items.firebaseAuthToken || null;
       var uid = items.firebaseUid || null;
       handleAuthDataChanged(authToken, uid);
@@ -81,7 +82,7 @@ function populateExtension(results) {
   if(result.tags) {
     $("#input_tags").val(result.tags.join(','));
   } else {
-    $("#input_tags").val()
+    $("#input_tags").val();
   }
   summaryChanged();
 }

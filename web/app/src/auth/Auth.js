@@ -9,10 +9,9 @@
     return {
       authWithGoogle: function() {
         auth.$authWithOAuthPopup('google', { scope: 'email' }).then(function(authData) {
-          debugger;
           var googleUser = authData.google;
           if (!googleUser.email || !googleUser.email.match(/@google.com$/) ) {
-            throw new Error('Invalid email; not a Firebase.com account');
+            throw new Error('Invalid email; not a google.com account');
           }
           deferred.resolve(authData);
         }).catch(function(error) {

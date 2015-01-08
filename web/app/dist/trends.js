@@ -186,10 +186,9 @@
     return {
       authWithGoogle: function() {
         auth.$authWithOAuthPopup('google', { scope: 'email' }).then(function(authData) {
-          debugger;
           var googleUser = authData.google;
           if (!googleUser.email || !googleUser.email.match(/@google.com$/) ) {
-            throw new Error('Invalid email; not a Firebase.com account');
+            throw new Error('Invalid email; not a google.com account');
           }
           deferred.resolve(authData);
         }).catch(function(error) {
@@ -233,6 +232,9 @@
 
   app.controller('LoginCtrl', function($scope, $window, Auth, routeTo) {
 
+    // no user before logged in
+    $scope.user = null;
+
     // Change status of message screen based on passed ENUM
     // Can provide custom message if desired
     function changeStatus(status, msg) {
@@ -250,8 +252,12 @@
 
     Auth.authWithGoogle()
     .then(function(user) {
-      $scope.loginStatus = changeStatus(Auth.STATUS.SUCCESS)
-      routeTo('/trends');
+      // set the user when logged in
+      $scope.user = user;
+      // change the status message on the view
+      $scope.loginStatus = changeStatus(Auth.STATUS.SUCCESS);
+      // route to the trends page
+      //routeTo('/trends');
     })
     .catch(function(error) {
       $scope.loginStatus = changeStatus(Auth.STATUS.ERROR, error.message);
@@ -307,54 +313,6 @@
       // if no path is provided return the binding from the Root ref
       return $firebase(Root);
     };
-  });
-
-}(angular, config));
-
-(function(angular, config) {
-  "use strict";
-
-  var app = config.app();
-
-  app.factory('$entries', function($base, $FirebaseArray, UsersRef, $q) {
-
-    var EntriesFactory = $FirebaseArray.$extendFactory({
-
-      // Return the user info and the entry as one object
-      getUserInfo: function() {
-        var deferreds = [];
-        angular.forEach(this.$list, function(entry) {
-          var deferred = $q.defer();
-
-          UsersRef.child(entry.userid).once('value', function(snap) {
-            var entryUser = {};
-            angular.extend(entryUser, entry, snap.val());
-            deferred.resolve(entryUser);
-          });
-
-          deferreds.push(deferred.promise);
-        });
-        return $q.all(deferreds);
-      }
-    });
-
-    return function $entries (id) {
-      return $base('/entries/' + id, { arrayFactory: EntriesFactory });
-    };
-
-  });
-
-}(angular, config));
-
-(function(angular, config) {
-  "use strict";
-
-  var app = config.app();
-
-  app.controller('EntriesCtrl', function($scope, entries) {
-    entries.getUserInfo().then(function(userEntries) {
-      $scope.entries = userEntries;
-    });
   });
 
 }(angular, config));
@@ -435,6 +393,54 @@
       }
     });
 
+  });
+
+}(angular, config));
+
+(function(angular, config) {
+  "use strict";
+
+  var app = config.app();
+
+  app.factory('$entries', function($base, $FirebaseArray, UsersRef, $q) {
+
+    var EntriesFactory = $FirebaseArray.$extendFactory({
+
+      // Return the user info and the entry as one object
+      getUserInfo: function() {
+        var deferreds = [];
+        angular.forEach(this.$list, function(entry) {
+          var deferred = $q.defer();
+
+          UsersRef.child(entry.userid).once('value', function(snap) {
+            var entryUser = {};
+            angular.extend(entryUser, entry, snap.val());
+            deferred.resolve(entryUser);
+          });
+
+          deferreds.push(deferred.promise);
+        });
+        return $q.all(deferreds);
+      }
+    });
+
+    return function $entries (id) {
+      return $base('/entries/' + id, { arrayFactory: EntriesFactory });
+    };
+
+  });
+
+}(angular, config));
+
+(function(angular, config) {
+  "use strict";
+
+  var app = config.app();
+
+  app.controller('EntriesCtrl', function($scope, entries) {
+    entries.getUserInfo().then(function(userEntries) {
+      $scope.entries = userEntries;
+    });
   });
 
 }(angular, config));

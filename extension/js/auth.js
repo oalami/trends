@@ -2,6 +2,7 @@ var firebaseAuthToken = "";
 var firebaseUid = "";
 var intervalId = null;
 var checker = function() {
+  console.log('checking for auth!');
   firebaseAuthToken = $('#firebaseAuthToken').text();
   firebaseUid = $('#firebaseUid').text();
 
