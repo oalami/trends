@@ -1,46 +1,43 @@
 <html>
 
 <head>
-  <script src="https://cdn.firebase.com/js/client/1.0.19/firebase.js"></script>
-  <script src="https://cdn.firebase.com/js/simple-login/1.6.3/firebase-simple-login.js"></script>
+  <script src="https://cdn.firebase.com/js/client/2.1.1/firebase.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script>
     var ref = new Firebase("https://trends.firebaseio.com");
 
-    function createAccount(user) {
-      if (!user.email || !user.email.match(/@firebase.com$/) ) {
-        throw new Error('Invalid email; not a Firebase.com account');
+    function createAccount(authData) {
+      if (!authData.google.email || !authData.google.email.match(/@google.com$/) ) {
+        throw new Error('Invalid email; not a Google.com account');
       }
       else {
-        var uref = ref.child('users/' + user.uid);
+        var uref = ref.child('users/' + authData.uid);
         uref.set({
-          name: user.displayName,
-          email: user.email,
-          avatar: user.thirdPartyUserData.picture
+          name: authData.google.displayName,
+          email: authData.google.email,
+          avatar: authData.google.cachedUserProfile.picture
         }, function(err) {
           if( err ) { console.error(err); }
           else {
-            console.log('user created', user.uid);
+            console.log('user created', authData.uid);
           }
         });
       }
     }
 
-    authClient = new FirebaseSimpleLogin(ref, function(error, user) {
+    ref.authWithOAuthRedirect("google", function(error) {
       if(error) {
         // an error occurred while attempting login
         console.log(error);
-      } else if(user) {
-        $('#firebaseUid').text(user.uid);
-        $('#firebaseAuthToken').text(user.firebaseAuthToken);
-
-        console.log("User ID: " + user.uid + ", Provider: " + user.provider);
-        createAccount(user);
-
-      } else {
-        authClient.login('google', {preferRedirect: true});
-        // user is logged out
       }
+    }, {  scope: "email" });
+
+    ref.onAuth(function(authData) {
+      $('#firebaseUid').text(authData.uid);
+      $('#firebaseAuthToken').text(authData.token);
+
+      console.log("User ID: " + authData.uid);
+      createAccount(authData);
     });
 
   </script>
