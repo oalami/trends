@@ -3,8 +3,16 @@
 <head>
   <script src="https://cdn.firebase.com/js/client/2.1.1/firebase.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<body>
+  <h1>Logging In...</h1>
+  <div id="firebaseUid" style="display:none;"></div>
+  <div id="firebaseAuthToken" style="display: none;"></div>
+
   <script>
+    debugger;
     var ref = new Firebase("https://trends.firebaseio.com");
+    var user = ref.getAuth();
 
     function createAccount(authData) {
       if (!authData.google.email || !authData.google.email.match(/@google.com$/) ) {
@@ -25,28 +33,29 @@
       }
     }
 
-    ref.authWithOAuthRedirect("google", function(error) {
-      if(error) {
-        // an error occurred while attempting login
-        console.log(error);
-      }
-    }, {  scope: "email" });
+
+    if(!user) {
+      debugger;
+      ref.authWithOAuthPopup("google", function(error) {
+        debugger;
+        if(error) {
+          // an error occurred while attempting login
+          console.log(error);
+        }
+      }, {  scope: "email" });
+    }
 
     ref.onAuth(function(authData) {
-      $('#firebaseUid').text(authData.uid);
-      $('#firebaseAuthToken').text(authData.token);
+      if(authData) {
+        $('#firebaseUid').text(authData.uid);
+        $('#firebaseAuthToken').text(authData.token);
 
-      console.log("User ID: " + authData.uid);
-      createAccount(authData);
+        console.log("User ID: " + authData.uid);
+        createAccount(authData);
+      }
     });
 
   </script>
-</head>
-<body>
-  <h1>Logging In...</h1>
-  <div id="firebaseUid" style="display:none;"></div>
-  <div id="firebaseAuthToken" style="display: none;"></div>
-
 </body>
 
 </html>

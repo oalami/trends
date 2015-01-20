@@ -1,6 +1,6 @@
 {
   "firebase": "trends",
-  "public": "web",
+  "public": "web/app",
   "ignore": [
     "firebase.json",
     ".*",

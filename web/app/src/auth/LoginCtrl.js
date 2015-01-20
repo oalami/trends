@@ -19,7 +19,7 @@
       };
 
       return returnStatus;
-    };
+    }
 
     $scope.loginStatus = changeStatus(Auth.STATUS.ANON);
 
@@ -30,7 +30,7 @@
       // change the status message on the view
       $scope.loginStatus = changeStatus(Auth.STATUS.SUCCESS);
       // route to the trends page
-      //routeTo('/trends');
+      routeTo('/trends');
     })
     .catch(function(error) {
       $scope.loginStatus = changeStatus(Auth.STATUS.ERROR, error.message);
@@ -38,4 +38,4 @@
     
   });
 
-}(window.angular, config));
+}(window.angular, window.config));

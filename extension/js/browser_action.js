@@ -1,7 +1,6 @@
 var ref = new Firebase("https://trends.firebaseio.com");
 var currentUserId = null;
 var documentUrl = null;
-var sessionName = "firebase:session::trends";
 
 function onOpen($) {
   function handleAuthDataChanged(authToken, uid) {
@@ -11,7 +10,7 @@ function onOpen($) {
       currentUserId = uid;
       ref.authWithCustomToken(authToken, function(err, authData) {
         if( err ) {
-          chrome.storage.local.remove([sessionName]);
+          chrome.storage.local.remove(['firebaseAuthToken', 'firebaseUid']);
           err(err);
         }
         else {
@@ -28,7 +27,7 @@ function onOpen($) {
       chrome.tabs.create({url: window.loginUrl});
     });
 
-    chrome.storage.local.get([sessionName], function(items) {
+    chrome.storage.local.get(['firebaseAuthToken', 'firebaseUid'], function(items) {
       var authToken = items.firebaseAuthToken || null;
       var uid = items.firebaseUid || null;
       handleAuthDataChanged(authToken, uid);
